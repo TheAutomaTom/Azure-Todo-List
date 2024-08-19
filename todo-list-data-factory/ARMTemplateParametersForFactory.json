@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "todo-list-data-factory"
+		},
+		"AdvWorksSqlServer_password": {
+			"value": ""
+		},
+		"AdvWorksBlob_connectionString": {
+			"value": ""
+		},
+		"AdvWorksSqlServer_properties_typeProperties_server": {
+			"value": "todolistsqlserver01.database.windows.net"
+		},
+		"AdvWorksSqlServer_properties_typeProperties_database": {
+			"value": "todolistazuresqldb01"
+		},
+		"AdvWorksSqlServer_properties_typeProperties_userName": {
+			"value": "admins-must-die"
+		}
+	}
+}
