@@ -7,13 +7,13 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "todo-list-data-factory"
 		},
-		"AdvWorksSqlServer_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'AdvWorksSqlServer'"
-		},
 		"AdvWorksBlob_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AdvWorksBlob'"
+		},
+		"AdvWorksSqlServer_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'AdvWorksSqlServer'"
 		},
 		"AdvWorksSqlServer_properties_typeProperties_server": {
 			"type": "string",
@@ -54,11 +54,11 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
-					"AdvWorksSqlServer_password": {
-						"value": "[parameters('AdvWorksSqlServer_password')]"
-					},
 					"AdvWorksBlob_connectionString": {
 						"value": "[parameters('AdvWorksBlob_connectionString')]"
+					},
+					"AdvWorksSqlServer_password": {
+						"value": "[parameters('AdvWorksSqlServer_password')]"
 					},
 					"AdvWorksSqlServer_properties_typeProperties_server": {
 						"value": "[parameters('AdvWorksSqlServer_properties_typeProperties_server')]"

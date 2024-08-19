@@ -7,13 +7,13 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "todo-list-data-factory"
 		},
-		"AdvWorksSqlServer_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'AdvWorksSqlServer'"
-		},
 		"AdvWorksBlob_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AdvWorksBlob'"
+		},
+		"AdvWorksSqlServer_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'AdvWorksSqlServer'"
 		},
 		"AdvWorksSqlServer_properties_typeProperties_server": {
 			"type": "string",
@@ -110,27 +110,50 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AdvWorksSqlServer')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"name": "[concat(parameters('factoryName'), '/CalculateProductsMarkups')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"server": "[parameters('AdvWorksSqlServer_properties_typeProperties_server')]",
-					"database": "[parameters('AdvWorksSqlServer_properties_typeProperties_database')]",
-					"encrypt": "True",
-					"trustServerCertificate": false,
-					"authenticationType": "SQL",
-					"userName": "[parameters('AdvWorksSqlServer_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('AdvWorksSqlServer_password')]"
-					},
-					"multipleActiveResultSets": "False"
-				}
+				"activities": [
+					{
+						"name": "AddMarkup",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflow1",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"AdvWorksProductStream": {},
+									"ProductsWithMarkup": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/dataflow1')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/AdvWorksProductsTable')]",
@@ -240,19 +263,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AdvWorksBlob')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"connectionString": "[parameters('AdvWorksBlob_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/advWorksProductExport')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -273,6 +283,161 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AdvWorksBlob')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AdvWorksBlob')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('AdvWorksBlob_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AdvWorksSqlServer')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('AdvWorksSqlServer_properties_typeProperties_server')]",
+					"database": "[parameters('AdvWorksSqlServer_properties_typeProperties_database')]",
+					"encrypt": "True",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('AdvWorksSqlServer_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('AdvWorksSqlServer_password')]"
+					},
+					"multipleActiveResultSets": "False"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AdvWorkMondayTrigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "AdvWorksProducts",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 7,
+						"startTime": "2024-08-19T23:17:00",
+						"endTime": "2024-08-20T23:12:00",
+						"timeZone": "Central Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/AdvWorksProducts')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "AdvWorksProductsTable",
+								"type": "DatasetReference"
+							},
+							"name": "AdvWorksProductStream"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "advWorksProductExport",
+								"type": "DatasetReference"
+							},
+							"name": "ProductsWithMarkup"
+						}
+					],
+					"transformations": [
+						{
+							"name": "CalculatedMarkup"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          ProductID as integer,",
+						"          Name as string,",
+						"          ProductNumber as string,",
+						"          Color as string,",
+						"          StandardCost as decimal(19,4),",
+						"          ListPrice as decimal(19,4),",
+						"          Size as string,",
+						"          Weight as decimal(8,2),",
+						"          ProductCategoryID as integer,",
+						"          ProductModelID as integer,",
+						"          SellStartDate as timestamp,",
+						"          SellEndDate as timestamp,",
+						"          DiscontinuedDate as timestamp,",
+						"          ThumbNailPhoto as binary,",
+						"          ThumbnailPhotoFileName as string,",
+						"          rowguid as string,",
+						"          ModifiedDate as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> AdvWorksProductStream",
+						"AdvWorksProductStream derive(Markup = ListPrice/StandardCost) ~> CalculatedMarkup",
+						"CalculatedMarkup sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     partitionFileNames:[(\"products-{currentUTC()}\")],",
+						"     truncate: true,",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     mapColumn(",
+						"          ProductID,",
+						"          Name,",
+						"          ProductNumber,",
+						"          Color,",
+						"          StandardCost,",
+						"          ListPrice,",
+						"          Size,",
+						"          Weight,",
+						"          ProductCategoryID,",
+						"          ProductModelID,",
+						"          SellStartDate,",
+						"          SellEndDate,",
+						"          DiscontinuedDate,",
+						"          rowguid,",
+						"          ModifiedDate,",
+						"          Markup",
+						"     ),",
+						"     partitionBy('hash', 1)) ~> ProductsWithMarkup"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AdvWorksProductsTable')]",
+				"[concat(variables('factoryId'), '/datasets/advWorksProductExport')]"
 			]
 		}
 	]

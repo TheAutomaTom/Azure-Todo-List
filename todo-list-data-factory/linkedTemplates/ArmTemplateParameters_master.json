@@ -5,10 +5,10 @@
 		"factoryName": {
 			"value": "todo-list-data-factory"
 		},
-		"AdvWorksSqlServer_password": {
+		"AdvWorksBlob_connectionString": {
 			"value": ""
 		},
-		"AdvWorksBlob_connectionString": {
+		"AdvWorksSqlServer_password": {
 			"value": ""
 		},
 		"AdvWorksSqlServer_properties_typeProperties_server": {
