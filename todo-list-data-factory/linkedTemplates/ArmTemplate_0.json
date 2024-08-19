@@ -332,7 +332,7 @@
 						"AdvWorksProductStream derive(Markup = ListPrice/StandardCost) ~> CalculatedMarkup",
 						"CalculatedMarkup sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     partitionFileNames:[(\"products-{currentUTC()}\")],",
+						"     partitionFileNames:[(\"products-{currentDate('yyyyMMddss')}\")],",
 						"     truncate: true,",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
